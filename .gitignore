@@ -1,0 +1,6 @@
+node_modules/
+*.msi
+.DS_Store
+Thumbs.db
+.gemini/
+.env
