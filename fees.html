@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+        }
+
+        /* Main Content */
+        .main {
+            width: 100%;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c5364;
+            margin-bottom: 25px;
+        }
+
+        /* Dashboard cards */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(320px, 1fr));
+            gap: 35px;
+        }
+
+        .card {
+            padding: 45px;
+            height: 220px;
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card.attendance {
+            background: #e3f2fd;
+        }
+
+        .card.marks {
+            background: #e8f5e9;
+        }
+
+        .card.fees {
+            background: #fffde7;
+        }
+
+        .card.announcements {
+            background: #fce4ec;
+        }
+
+        .card.library {
+            background: #f3e5f5;
+        }
+
+        .card h3 {
+            font-size: 24px;
+            color: #203a43;
+        }
+
+        /* Common box */
+        .page-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            margin-bottom: 25px;
+        }
+
+        .page-box h2,
+        .page-box h3 {
+            color: #2c5364;
+            margin-bottom: 15px;
+        }
+
+        /* Input & Buttons */
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            background: #2c5364;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #203a43;
+        }
+
+        /* Option cards */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .option-card {
+            padding: 20px;
+            background: #f4f4f4;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .option-card:hover {
+            background: #e0e0e0;
+        }
+
+        .option-card.selected {
+            background: #d1e7dd;
+            border: 2px solid #059669;
+        }
+
+        /* Responsive */
+        @media (max-width:900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .id-error {
+            color: red;
+            display: none;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main" id="content"></div>
+
+    <script>
+        // ---------- Mock Data ----------
+        const FIXED_FEE = 50000;
+        const mockPaidAmounts = { "1234567890": 20000, "2024000001": 50000, "1111122222": 0 };
+
+        // ---------- Fees Portal ----------
+        function loadFeesPortal() {
+            document.getElementById("content").innerHTML = `
+        <div class="page-title">Fee Portal</div>
+        <div class="page-box" id="step1">
+            <h3>Step 1: Enter Student ID</h3>
+            <input type="text" id="studentId" placeholder="XXXXXXXXXX" maxlength="10">
+            <p class="id-error" id="idError">Please enter exactly 10 digits.</p>
+            <button onclick="verifyFeeID()">Continue</button>
+        </div>
+        <div class="page-box" id="step2" style="display:none;">
+            <h3>Step 2: Select Fee Type</h3>
+            <div class="options-grid">
+                <div class="option-card" onclick="selectFeeType('reimbursement', this)">Reimbursement (Govt/Scholarship)</div>
+                <div class="option-card" onclick="selectFeeType('non-reimbursement', this)">Non-Reimbursement (Self-Finance)</div>
+            </div>
+        </div>
+        <div class="page-box" id="step3" style="display:none;" >
+            <h3>Step 3: Fee Details</h3>
+            <div id="feeDisplay"></div>
+        </div>
+    `;
+
+            document.getElementById('studentId').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, ''); });
+        }
+
+        // ---------- Step 1: Verify ID ----------
+        function verifyFeeID() {
+            const input = document.getElementById('studentId');
+            const error = document.getElementById('idError');
+            if (input.value.length === 10) {
+                error.style.display = 'none';
+                document.getElementById('step1').style.display = 'none';
+                document.getElementById('step2').style.display = 'block';
+            } else {
+                error.style.display = 'block';
+            }
+        }
+
+        // ---------- Step 2: Select Fee Type ----------
+        let selectedStudentID = '';
+        let selectedFeeType = '';
+        function selectFeeType(type, el) {
+            selectedStudentID = document.getElementById('studentId').value;
+            selectedFeeType = type;
+
+            // Highlight selection
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+
+            // Show fee details after short delay
+            setTimeout(() => showFeeStructure(selectedStudentID, selectedFeeType), 200);
+        }
+
+        // ---------- Step 3: Show Fee Structure ----------
+        function showFeeStructure(id, type) {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            const paid = mockPaidAmounts[id] || 0;
+
+            if (type === 'reimbursement') {
+                document.getElementById('feeDisplay').innerHTML = `
+            <div>Total Fee: ₹ 0 (Covered by Government/Scholarship)</div>
+            <div>Amount Paid: ₹ 0</div>
+            <div>Balance Amount: ₹ 0</div>
+            <p style="color:green;font-weight:bold;">No payment required.</p>
+        `;
+            } else {
+                const balance = FIXED_FEE - paid;
+                document.getElementById('feeDisplay').innerHTML = `
+            <div>Total Fee: ₹ ${FIXED_FEE.toLocaleString()}</div>
+            <div>Amount Paid: ₹ ${paid.toLocaleString()}</div>
+            <div>Balance Amount: ₹ ${balance.toLocaleString()}</div>
+            ${balance > 0 ? `<button onclick="payFee('${id}')">Pay Balance (₹ ${balance.toLocaleString()})</button>` : ''}
+        `;
+            }
+        }
+
+        // ---------- Pay Fee ----------
+        function payFee(id) {
+            alert('Redirecting to secure payment for ID: ' + id);
+            mockPaidAmounts[id] = FIXED_FEE;
+            showFeeStructure(id, selectedFeeType);
+        }
+
+        // ---------- Load Portal on Start ----------
+        loadFeesPortal();
+    </script>
+
+</body>
+
+</html>
+
+</html>

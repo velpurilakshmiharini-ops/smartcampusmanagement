@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus - Faculty Portal</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --rose: #f43f5e;
+            --bg-light: #ffffff;
+            --container-bg: #ffe4e6;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: rgba(99, 102, 241, 0.1);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top right, #fff1f2, #ffffff);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+            /* Prevent body scroll, use main content scroll */
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-light);
+            border-right: 1px solid var(--border);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            height: 100vh;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-item {
+            padding: 14px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: #fef2f2;
+            color: var(--rose);
+        }
+
+        .nav-item.active {
+            background: var(--rose);
+            color: white;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* --- Dashboard View (Home) --- */
+        #dashboardView {
+            padding: 60px 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .welcome-header {
+            text-align: center;
+            margin-bottom: 50px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .welcome-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .portal-card {
+            background: var(--container-bg);
+            border-radius: 32px;
+            padding: 45px 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: 0.4s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(244, 63, 94, 0.1);
+            border-color: var(--rose);
+        }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            background: #fff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        /* --- Iframe View (Modules) --- */
+        #iframeView {
+            display: none;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 20px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .main-content {
+                height: calc(100vh - 120px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">Smart Campus</div>
+        <ul class="nav-list">
+            <li class="nav-item active" onclick="loadPortal('dashboard')">Dashboard</li>
+            <li class="nav-item" onclick="loadPortal('faculty_attendance.html')">Faculty Attendance</li>
+            <li class="nav-item" onclick="loadPortal('announcements.html')">Announcements</li>
+            <li class="nav-item" onclick="loadPortal('student_attendance.html')">Student Attendance</li>
+            <li class="nav-item" onclick="logout()" style="color: #f43f5e; margin-top: auto;">Logout</li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Overview -->
+        <div id="dashboardView">
+            <div class="welcome-header">
+                <h1 id="greeting">Welcome Faculty</h1>
+                <p>Manage your classes and campus activities seamlessly.</p>
+            </div>
+            <div class="dashboard-grid">
+                <div class="portal-card" onclick="loadPortal('faculty_attendance.html')">
+                    <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f43f5e"
+                            stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg></div>
+                    <h3>Faculty Attendance</h3>
+                    <p>Mark your daily presence</p>
+                </div>
+                <div class="portal-card" onclick="loadPortal('announcements.html')">
+                    <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f43f5e"
+                            stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg></div>
+                    <h3>Announcements</h3>
+                    <p>Post and view campus news</p>
+                </div>
+                <div class="portal-card" onclick="loadPortal('student_attendance.html')">
+                    <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f43f5e"
+                            stroke-width="2">
+                            <path
+                                d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-4.994-1.428C4.12 18.062 4 16.837 4 15.5c0-4.736 3.582-8.5 8-8.5s8 3.764 8 8.5c0 1.285-.208 2.523-.591 3.681M14.243 4.243a8 8 0 1 1-11.314 0">
+                            </path>
+                        </svg></div>
+                    <h3>Student Attendance</h3>
+                    <p>Track student presence</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Viewer -->
+        <div id="iframeView">
+            <iframe id="mainFrame" src="" onload="onFrameLoad()"></iframe>
+        </div>
+    </main>
+
+    <script>
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                window.location.href = "login.html";
+            }
+        }
+
+        function loadPortal(target) {
+            const dashboard = document.getElementById('dashboardView');
+            const iframeArea = document.getElementById('iframeView');
+            const iframe = document.getElementById('mainFrame');
+            const navItems = document.querySelectorAll('.nav-item');
+
+            // Update Active Link UI
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('onclick').includes(target)) {
+                    item.classList.add('active');
+                }
+            });
+
+            if (target === 'dashboard') {
+                dashboard.style.display = 'flex';
+                iframeArea.style.display = 'none';
+                iframe.src = '';
+            } else {
+                dashboard.style.display = 'none';
+                iframeArea.style.display = 'block';
+                iframe.src = target;
+            }
+        }
+
+        // Attempt to clean up internal sidebars for a seamless look
+        function onFrameLoad() {
+            try {
+                const frame = document.getElementById('mainFrame');
+                const frameWindow = frame.contentWindow;
+                const frameDoc = frameWindow.document;
+
+                // Hide internal sidebars if they exist
+                const internalSidebar = frameDoc.querySelector('.sidebar');
+                if (internalSidebar) {
+                    internalSidebar.style.display = 'none';
+                }
+
+                // Adjust internal margins/padding for content-only view
+                const mainContent = frameDoc.querySelector('.main');
+                if (mainContent) {
+                    mainContent.style.padding = '40px';
+                    mainContent.style.width = '100%';
+                    mainContent.style.flex = '1';
+                }
+
+                // Hide duplicate dashboard buttons
+                const backButtons = frameDoc.querySelectorAll('button');
+                backButtons.forEach(btn => {
+                    if (btn.innerText.toLowerCase().includes('back to dashboard')) {
+                        btn.style.display = 'none';
+                    }
+                });
+            } catch (e) {
+                console.log("Cross-origin or frame access issue (expected in some local security settings):", e);
+            }
+        }
+
+        // Set dynamic greeting
+        const hour = new Date().getHours();
+        const greeting = document.getElementById('greeting');
+        if (hour < 12) greeting.innerText = "Good Morning, Faculty";
+        else if (hour < 18) greeting.innerText = "Good Afternoon, Faculty";
+        else greeting.innerText = "Good Evening, Faculty";
+    </script>
+</body>
+
+</html>

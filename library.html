@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Library Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+        }
+
+        /* Main Content */
+        .main {
+            width: 100%;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c5364;
+            margin-bottom: 25px;
+        }
+
+        .page-box {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        table th {
+            background: #2c5364;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .back-btn {
+            margin-top: 20px;
+            padding: 12px 28px;
+            border: none;
+            background: #2c5364;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: #203a43;
+        }
+
+        /* Add book form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 15px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .add-btn {
+            background: #059669;
+        }
+
+        .add-btn:hover {
+            background: #047857;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        @media(max-width:900px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .main {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main" id="content"></div>
+
+    <script>
+        // ---------- Mock Backend Data ----------
+        const libraryData = [
+            { name: "Alice", dept: "CSE", book: "DBMS", issued: "2026-01-15", submission: "2026-01-22" },
+            { name: "Bob", dept: "ECE", book: "Mathematics", issued: "2026-01-18", submission: "2026-01-25" },
+            { name: "Charlie", dept: "ME", book: "Physics", issued: "2026-01-10", submission: "2026-01-20" },
+        ];
+
+        const MAX_BOOKS_PER_STUDENT = 2;
+        const PENALTY_PER_DAY = 30;
+
+        // ---------- Navigation ----------
+        // ---------- Library Page ----------
+        function loadLibrary() {
+            let html = `
+        <div class="page-title">Library Dashboard</div>
+
+        <div class="page-box">
+            <h3>Issue a New Book</h3>
+            <div class="error" id="libraryError"></div>
+            <div class="form-group">
+                <input type="text" id="studentName" placeholder="Student Name">
+            </div>
+            <div class="form-group">
+                <input type="text" id="studentDept" placeholder="Department">
+            </div>
+            <div class="form-group">
+                <input type="text" id="bookName" placeholder="Book Name">
+            </div>
+            <div class="form-group">
+                <label>Issued Date:</label>
+                <input type="date" id="issuedDate">
+            </div>
+            <div class="form-group">
+                <label>Submission Date:</label>
+                <input type="date" id="submissionDate">
+            </div>
+            <button class="add-btn" onclick="issueBook()">Issue Book</button>
+        </div>
+
+        <div class="page-box">
+            <h3>Issued Books</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Book Name</th>
+                        <th>Issued Date</th>
+                        <th>Submission Date</th>
+                        <th>Penalty (₹)</th>
+                    </tr>
+                </thead>
+                <tbody id="libraryTable"></tbody>
+            </table>
+        </div>
+
+        `;
+
+            document.getElementById("content").innerHTML = html;
+            renderLibraryTable();
+        }
+
+        // ---------- Render Library Table ----------
+        function renderLibraryTable() {
+            const tbody = document.getElementById("libraryTable");
+            tbody.innerHTML = "";
+
+            const today = new Date();
+
+            libraryData.forEach(record => {
+                const subDate = new Date(record.submission);
+                let penalty = 0;
+                if (today > subDate) {
+                    const diffTime = Math.abs(today - subDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    penalty = diffDays * PENALTY_PER_DAY;
+                }
+
+                tbody.innerHTML += `
+            <tr>
+                <td>${record.name}</td>
+                <td>${record.dept}</td>
+                <td>${record.book}</td>
+                <td>${record.issued}</td>
+                <td>${record.submission}</td>
+                <td>${penalty}</td>
+            </tr>
+            `;
+            });
+        }
+
+        // ---------- Issue a Book ----------
+        function issueBook() {
+            const name = document.getElementById("studentName").value.trim();
+            const dept = document.getElementById("studentDept").value.trim();
+            const book = document.getElementById("bookName").value.trim();
+            const issued = document.getElementById("issuedDate").value;
+            const submission = document.getElementById("submissionDate").value;
+            const errorEl = document.getElementById("libraryError");
+
+            if (!name || !dept || !book || !issued || !submission) {
+                errorEl.textContent = "All fields are required!";
+                return;
+            }
+
+            // Check if student has already 2 books
+            const studentBooks = libraryData.filter(rec => rec.name === name);
+            if (studentBooks.length >= MAX_BOOKS_PER_STUDENT) {
+                errorEl.textContent = `${name} already has ${MAX_BOOKS_PER_STUDENT} books issued.`;
+                return;
+            }
+
+            // Add to library data
+            libraryData.push({ name, dept, book, issued, submission });
+            errorEl.textContent = "";
+            renderLibraryTable();
+
+            // Clear input fields
+            document.getElementById("studentName").value = "";
+            document.getElementById("studentDept").value = "";
+            document.getElementById("bookName").value = "";
+            document.getElementById("issuedDate").value = "";
+            document.getElementById("submissionDate").value = "";
+        }
+
+        // ---------- Load Library initially ----------
+        loadLibrary();
+    </script>
+
+</body>
+
+</html>

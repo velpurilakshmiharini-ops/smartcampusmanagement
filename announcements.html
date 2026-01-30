@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Announcements</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+        }
+
+        /* Main Content */
+        .main {
+            width: 100%;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c5364;
+            margin-bottom: 25px;
+        }
+
+        /* Common box */
+        .page-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            margin-bottom: 25px;
+        }
+
+        .page-box h2,
+        .page-box h3 {
+            color: #2c5364;
+            margin-bottom: 15px;
+        }
+
+        /* Announcement containers */
+        .announcement-container {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .announcement-container h3 {
+            margin-bottom: 10px;
+            color: #2c5364;
+        }
+
+        .announcement-container p {
+            color: #444;
+            line-height: 1.5;
+        }
+
+        /* Input & Buttons */
+        button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            background: #2c5364;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #203a43;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main" id="content"></div>
+
+    <script>
+        // ---------- Announcements Dashboard ----------
+        function loadAnnouncements() {
+            document.getElementById("content").innerHTML = `
+        <div class="page-title">Announcements</div>
+        
+        <div class="announcement-container">
+            <h3>Technical Announcements</h3>
+            <p>- New workshop on AI and Machine Learning scheduled on 15th Feb.<br>
+            - Server maintenance will occur on 1st Feb, so all lab servers will be down from 10 PM to 2 AM.</p>
+        </div>
+        
+        <div class="announcement-container">
+            <h3>Non-Technical Announcements</h3>
+            <p>- Annual sports day registration is now open. Register your team by 5th Feb.<br>
+            - Cultural club meeting will be held in Room 101 on 3rd Feb at 4 PM.</p>
+        </div>
+        
+        <div class="announcement-container">
+            <h3>Exams Announcements</h3>
+            <p>- Mid-term exams will begin on 20th Feb. Check your schedule on the portal.<br>
+            - Practical exams for DBMS lab will be held from 18th to 22nd Feb.</p>
+        </div>
+        
+        <div class="announcement-container">
+            <h3>Holidays Announcements</h3>
+            <p>- College will remain closed on 14th Feb due to National Holiday.<br>
+            - Spring break will be from 25th March to 31st March.</p>
+        </div>
+    `;
+        }
+
+        // ---------- Load Announcements on Start ----------
+        loadAnnouncements();
+    </script>
+
+</body>
+
+</html>

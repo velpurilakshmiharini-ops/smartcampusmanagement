@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Faculty Attendance Oversight</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c5364;
+            margin-bottom: 25px;
+        }
+
+        .report-box {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .present {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .on-leave {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <h1 class="page-title">Faculty Attendance Logs</h1>
+        <div class="report-box">
+            <div style="margin-bottom: 20px;">
+                <label for="idSearch" style="font-weight: 600; color: #475569;">Search Faculty ID:</label>
+                <input type="text" id="idSearch" placeholder="Enter ID (e.g. #F882)"
+                    style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; width: 250px; margin-left: 10px;"
+                    onkeyup="filterTable()">
+            </div>
+            <p>Viewing live presence data for <strong>29th Jan 2026</strong></p>
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Faculty ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Check-in Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#F882</td>
+                        <td>Dr. Smith</td>
+                        <td>Computer Science</td>
+                        <td>08:45 AM</td>
+                        <td><span class="status present">Present</span></td>
+                    </tr>
+                    <tr>
+                        <td>#F761</td>
+                        <td>Prof. Sarah</td>
+                        <td>Electronics</td>
+                        <td>09:10 AM</td>
+                        <td><span class="status present">Present</span></td>
+                    </tr>
+                    <tr>
+                        <td>#F902</td>
+                        <td>Mr. John Doe</td>
+                        <td>Mechanical</td>
+                        <td>-</td>
+                        <td><span class="status on-leave">On Leave</span></td>
+                    </tr>
+                    <tr>
+                        <td>#F123</td>
+                        <td>Dr. Brown</td>
+                        <td>Mathematics</td>
+                        <td>08:30 AM</td>
+                        <td><span class="status present">Present</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function filterTable() {
+            const input = document.getElementById("idSearch");
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById("attendanceTable");
+            const tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+        }
+
+        /* Main Content */
+        .main {
+            width: 100%;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c5364;
+            margin-bottom: 25px;
+        }
+
+        /* Dashboard cards */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(320px, 1fr));
+            gap: 35px;
+        }
+
+        .card {
+            padding: 45px;
+            height: 220px;
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card.attendance {
+            background: #e3f2fd;
+        }
+
+        .card.marks {
+            background: #e8f5e9;
+        }
+
+        .card.fees {
+            background: #fffde7;
+        }
+
+        .card.announcements {
+            background: #fce4ec;
+        }
+
+        .card.library {
+            background: #f3e5f5;
+        }
+
+        .card h3 {
+            font-size: 24px;
+            color: #203a43;
+        }
+
+        /* Common box */
+        .page-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            margin-bottom: 25px;
+        }
+
+        .page-box h2 {
+            color: #2c5364;
+            margin-bottom: 15px;
+        }
+
+        /* Marks table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        table th {
+            background: #2c5364;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        /* Graph canvas */
+        #marksGraph {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            display: block;
+            margin-top: 20px;
+        }
+
+        /* Back button */
+        .back-btn {
+            margin-top: 30px;
+            padding: 12px 28px;
+            border: none;
+            background: #2c5364;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: #203a43;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main" id="content"></div>
+
+    <script>
+        // ---------- Backend Simulation ----------
+        const backend = {
+            marks: {
+                DBMS: { theory: { internal: 25, external: 60 }, lab: { internal: 28, external: 65 } },
+                Maths: { theory: { internal: 27, external: 63 }, lab: { internal: 26, external: 64 } },
+                Java: { theory: { internal: 24, external: 62 }, lab: { internal: 29, external: 68 } },
+                Python: { theory: { internal: 26, external: 61 }, lab: { internal: 27, external: 66 } }
+            }
+        };
+
+        // ---------- Marks Page ----------
+        function loadMarks() {
+            let html = `
+        <div class="page-title">Marks Dashboard</div>
+        <div class="page-box">
+            <h2>Subjects Marks</h2>
+            <table>
+                <tr>
+                    <th>Subject</th>
+                    <th>Theory Internal (30)</th>
+                    <th>Theory External (70)</th>
+                    <th>Lab Internal (30)</th>
+                    <th>Lab External (70)</th>
+                </tr>
+    `;
+
+            const subjects = [];
+            const theoryMarks = [];
+            const labMarks = [];
+
+            for (const subject in backend.marks) {
+                const data = backend.marks[subject];
+                const totalTheory = data.theory.internal + data.theory.external;
+                const totalLab = data.lab.internal + data.lab.external;
+                subjects.push(subject);
+                theoryMarks.push(totalTheory);
+                labMarks.push(totalLab);
+
+                html += `
+            <tr>
+                <td>${subject}</td>
+                <td>${data.theory.internal}</td>
+                <td>${data.theory.external}</td>
+                <td>${data.lab.internal}</td>
+                <td>${data.lab.external}</td>
+            </tr>
+        `;
+            }
+
+            html += `
+            </table>
+            <canvas id="marksGraph" width="800" height="400"></canvas>
+        </div>
+    `;
+
+            document.getElementById("content").innerHTML = html;
+
+            // Draw Graph
+            drawMarksGraph(subjects, theoryMarks, labMarks);
+        }
+
+        // ---------- Draw Graph Function ----------
+        function drawMarksGraph(subjects, theoryMarks, labMarks) {
+            const canvas = document.getElementById('marksGraph');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const padding = 50;
+            const graphWidth = canvas.width - 2 * padding;
+            const graphHeight = canvas.height - 2 * padding;
+            const maxMarks = 100; // max for each theory/lab (sum of internal+external)
+            const barWidth = 30;
+            const gap = (graphWidth - subjects.length * 2 * barWidth) / (subjects.length + 1);
+
+            // Draw axes
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, padding + graphHeight);
+            ctx.lineTo(padding + graphWidth, padding + graphHeight);
+            ctx.strokeStyle = '#203a43';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw Y axis marks
+            ctx.fillStyle = '#203a43';
+            ctx.font = '14px Arial';
+            for (let i = 0; i <= maxMarks; i += 20) {
+                let y = padding + graphHeight - (i / maxMarks * graphHeight);
+                ctx.fillText(i, padding - 30, y + 5);
+                ctx.beginPath();
+                ctx.moveTo(padding - 5, y);
+                ctx.lineTo(padding, y);
+                ctx.stroke();
+            }
+
+            // Draw bars
+            let x = padding + gap;
+            for (let i = 0; i < subjects.length; i++) {
+                // Theory bar
+                let theoryHeight = (theoryMarks[i] / maxMarks) * graphHeight;
+                ctx.fillStyle = '#4a768a';
+                ctx.fillRect(x, padding + graphHeight - theoryHeight, barWidth, theoryHeight);
+
+                // Lab bar
+                let labHeight = (labMarks[i] / maxMarks) * graphHeight;
+                ctx.fillStyle = '#a44a7c';
+                ctx.fillRect(x + barWidth, padding + graphHeight - labHeight, barWidth, labHeight);
+
+                // X axis labels
+                ctx.fillStyle = '#203a43';
+                ctx.textAlign = 'center';
+                ctx.fillText(subjects[i], x + barWidth, padding + graphHeight + 20);
+
+                x += 2 * barWidth + gap;
+            }
+
+            // Legend
+            ctx.fillStyle = '#4a768a';
+            ctx.fillRect(padding, 20, 20, 15);
+            ctx.fillStyle = '#203a43';
+            ctx.fillText('Theory Marks', padding + 30, 32);
+
+            ctx.fillStyle = '#a44a7c';
+            ctx.fillRect(padding + 150, 20, 20, 15);
+            ctx.fillStyle = '#203a43';
+            ctx.fillText('Lab Marks', padding + 180, 32);
+        }
+
+        // ---------- Load Marks by default ----------
+        loadMarks();
+    </script>
+
+</body>
+
+</html>
+
+</html>

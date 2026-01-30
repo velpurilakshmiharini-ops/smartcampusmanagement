@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Campus Exam Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c5364;
+            margin-bottom: 25px;
+        }
+
+        .result-container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .sum-item h4 {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .sum-item p {
+            font-size: 24px;
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .filter-box {
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        select,
+        input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .pass {
+            color: #10b981;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="page-title">Executive Result Reports</h1>
+
+    <div class="result-container">
+        <div class="summary">
+            <div class="sum-item">
+                <h4>Overall Pass Rate</h4>
+                <p>89.4%</p>
+            </div>
+            <div class="sum-item">
+                <h4>Total Exams</h4>
+                <p>24</p>
+            </div>
+            <div class="sum-item">
+                <h4>Topper Avg</h4>
+                <p>98.2%</p>
+            </div>
+        </div>
+
+        <div class="filter-box">
+            <div class="filter-group">
+                <label>Year of Study</label>
+                <select id="yearFilter" onchange="applyFilters()">
+                    <option value="">All Years</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Department</label>
+                <select id="deptFilter" onchange="applyFilters()">
+                    <option value="">All Departments</option>
+                    <option value="B.Tech">B.Tech</option>
+                    <option value="MCA">MCA</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Student ID / Name</label>
+                <input type="text" id="idSearch" placeholder="Search..." onkeyup="applyFilters()">
+            </div>
+        </div>
+
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Batch</th>
+                    <th>Semester</th>
+                    <th>Ave. Marks</th>
+                    <th>Pass/Fail Ratio</th>
+                    <th>Top Scorer</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody">
+                <tr data-year="2022" data-dept="B.Tech">
+                    <td>B.Tech 2022</td>
+                    <td>Sem 4</td>
+                    <td>76%</td>
+                    <td><span class="pass">92/8</span></td>
+                    <td>Alice Brown (98%)</td>
+                </tr>
+                <tr data-year="2021" data-dept="B.Tech">
+                    <td>B.Tech 2021</td>
+                    <td>Sem 6</td>
+                    <td>82%</td>
+                    <td><span class="pass">88/12</span></td>
+                    <td>David Wilson (94.5%)</td>
+                </tr>
+                <tr data-year="2023" data-dept="MCA">
+                    <td>MCA 2023</td>
+                    <td>Sem 2</td>
+                    <td>68%</td>
+                    <td><span class="pass">95/5</span></td>
+                    <td>Emma Stone (91%)</td>
+                </tr>
+                <tr data-year="2023" data-dept="B.Tech">
+                    <td>B.Tech 2023</td>
+                    <td>Sem 2</td>
+                    <td>74%</td>
+                    <td><span class="pass">90/10</span></td>
+                    <td>John Smith (95%)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function applyFilters() {
+            const year = document.getElementById("yearFilter").value;
+            const dept = document.getElementById("deptFilter").value;
+            const search = document.getElementById("idSearch").value.toUpperCase();
+            const rows = document.getElementById("resultsBody").getElementsByTagName("tr");
+
+            for (let i = 0; i < rows.length; i++) {
+                const rowYear = rows[i].getAttribute("data-year");
+                const rowDept = rows[i].getAttribute("data-dept");
+                const rowText = rows[i].innerText.toUpperCase();
+
+                const yearMatch = !year || rowYear === year;
+                const deptMatch = !dept || rowDept === dept;
+                const searchMatch = !search || rowText.indexOf(search) > -1;
+
+                if (yearMatch && deptMatch && searchMatch) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

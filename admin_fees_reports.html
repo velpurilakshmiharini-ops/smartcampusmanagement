@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fees & Revenue Reports</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c5364;
+            margin-bottom: 25px;
+        }
+
+        .financial-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .f-item {
+            text-align: center;
+        }
+
+        .f-label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .f-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .report-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-panel {
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        select,
+        input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+        }
+
+        .pending {
+            color: #f43f5e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="page-title">Fees Collection Dashboard</h1>
+
+    <div class="financial-card">
+        <div class="f-item">
+            <div class="f-label">Total Expected</div>
+            <div class="f-value">₹1,240,000</div>
+        </div>
+        <div class="f-item">
+            <div class="f-label">Total Collected</div>
+            <div class="f-value">₹980,500</div>
+        </div>
+        <div class="f-item">
+            <div class="f-label">Outstanding</div>
+            <div class="f-value" style="color:#f472b6;">₹259,500</div>
+        </div>
+    </div>
+
+    <div class="filter-panel">
+        <div class="filter-group">
+            <label>Year</label>
+            <select id="yearFilter" onchange="filterFees()">
+                <option value="">All Years</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Department</label>
+            <select id="deptFilter" onchange="filterFees()">
+                <option value="">All Depts</option>
+                <option value="CS">Computer Science</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Mechanical">Mechanical</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Student ID / Name</label>
+            <input type="text" id="idSearch" placeholder="Search..." onkeyup="filterFees()">
+        </div>
+    </div>
+
+    <div class="report-section">
+        <h3>Department Breakdown</h3>
+        <table id="feesTable">
+            <thead>
+                <tr>
+                    <th>Department / Student</th>
+                    <th>Expected</th>
+                    <th>Collected</th>
+                    <th>Pending</th>
+                    <th>% Complete</th>
+                </tr>
+            </thead>
+            <tbody id="feesBody">
+                <tr data-dept="CS" data-year="2024">
+                    <td>Computer Science</td>
+                    <td>₹400,000</td>
+                    <td>₹340,000</td>
+                    <td><span class="pending">₹60,000</span></td>
+                    <td>85%</td>
+                </tr>
+                <tr data-dept="Electronics" data-year="2024">
+                    <td>Electronics</td>
+                    <td>₹350,000</td>
+                    <td>₹310,000</td>
+                    <td><span class="pending">₹40,000</span></td>
+                    <td>88.5%</td>
+                </tr>
+                <tr data-dept="Mechanical" data-year="2025">
+                    <td>Mechanical</td>
+                    <td>₹300,000</td>
+                    <td>₹200,000</td>
+                    <td><span class="pending">₹100,000</span></td>
+                    <td>66.6%</td>
+                </tr>
+                <tr data-dept="CS" data-year="2025">
+                    <td>CS Graduate Asst</td>
+                    <td>₹190,000</td>
+                    <td>₹130,500</td>
+                    <td><span class="pending">₹59,500</span></td>
+                    <td>68.6%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function filterFees() {
+            const year = document.getElementById("yearFilter").value;
+            const dept = document.getElementById("deptFilter").value;
+            const search = document.getElementById("idSearch").value.toUpperCase();
+            const rows = document.getElementById("feesBody").getElementsByTagName("tr");
+
+            for (let i = 0; i < rows.length; i++) {
+                const rowYear = rows[i].getAttribute("data-year");
+                const rowDept = rows[i].getAttribute("data-dept");
+                const rowText = rows[i].innerText.toUpperCase();
+
+                const yearMatch = !year || rowYear === year;
+                const deptMatch = !dept || rowDept === dept;
+                const searchMatch = !search || rowText.indexOf(search) > -1;
+
+                if (yearMatch && deptMatch && searchMatch) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
